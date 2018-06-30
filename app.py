@@ -3,6 +3,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+from flask import Flask
 
 import plotly.plotly as py
 import plotly.graph_objs as go
@@ -11,14 +12,16 @@ import plotly.figure_factory as FF
 import numpy as np
 import pandas as pd
 
+server = Flask(__name__)
+app = dash.Dash(__name__, server=server)
+app.scripts.config.serve_locally = True
+
 data = pd.read_csv('https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/714411/Monthly_museums_and_galleries_April_2018.csv', encoding='latin1')
 data['day'] = 1
 data['Month'] = pd.to_datetime(data[['month', 'year', 'day']])
 museums_list = data.museum.unique()
 data = data.pivot(index='Month',columns='museum',values='visits')
 data = data.reset_index()
-
-app = dash.Dash()
 
 app.layout = html.Div(children=[
     html.H1(children='Museums Dashboard'),
@@ -80,4 +83,4 @@ def update_graph(selected_dropdown_value):
 app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()

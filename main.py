@@ -23,8 +23,11 @@ museums_list = data.museum.unique()
 data = data.pivot(index='Month',columns='museum',values='visits')
 data = data.reset_index()
 
+data2
+
 app.layout = html.Div(children=[
     html.H1(children='Museums Dashboard'),
+    html.H2(children='Compare visits between museums')
     dcc.Dropdown(
                 id='my-dropdown',
                 options=[{'label': i, 'value': i} for i in museums_list],
@@ -33,9 +36,15 @@ app.layout = html.Div(children=[
             ),
     html.Div(id='my-div'),
     dcc.Graph(id='my-graph')
+    html.H2(children='Compare seasons for a museum')
+    dcc.Dropdown(
+                id='my-dropdown',
+                options=[{'label': i, 'value': i} for i in museums_list],
+                value=['BRITISH MUSEUM'],
+            ),
+    dcc.Graph(id='my-graph2')
     
 ])
-
 
 @app.callback(Output('my-graph', 'figure'), [Input('my-dropdown', 'value')])
 def update_graph(selected_dropdown_value):
@@ -55,7 +64,7 @@ def update_graph(selected_dropdown_value):
     
     data2 = traces
     layout = dict(
-        title='Museum Visits',
+        #title='Compare visits between museums',
         xaxis=dict(
             range=['2003-12-01','2018-04-20'],
             rangeselector=dict(
@@ -76,12 +85,6 @@ def update_graph(selected_dropdown_value):
                          label='All',
                          step='month',
                          stepmode='backward'),
-
-#                    dict(count=1,
-#                        label='YTD',
-#                        step='year',
-#                        stepmode='todate'),
-                    #dict(step='all'),
                 ])
             ),
             #rangeslider=dict(),

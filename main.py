@@ -57,6 +57,7 @@ def update_graph(selected_dropdown_value):
     layout = dict(
         title='Museum Visits',
         xaxis=dict(
+            range=['2003-12-01','2018-04-20'],
             rangeselector=dict(
                 buttons=list([
                     dict(count=1,
@@ -67,15 +68,24 @@ def update_graph(selected_dropdown_value):
                          label='3y',
                          step='year',
                          stepmode='backward'),
+                    dict(count=5,
+                         label='5y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(count=14*12+4,
+                         label='All',
+                         step='month',
+                         stepmode='backward'),
+
 #                    dict(count=1,
 #                        label='YTD',
 #                        step='year',
 #                        stepmode='todate'),
-                    dict(step='all'),
+                    #dict(step='all'),
                 ])
             ),
             #rangeslider=dict(),
-            type='date'
+            type='date',
         )
     )
     return dict(data=data2, layout=layout)

@@ -18,12 +18,17 @@ server = Flask(__name__)
 app = dash.Dash(__name__, server=server)
 app.scripts.config.serve_locally = True
 
+#develop offline
+#app.css.config.serve_locally = True
+#app.scripts.config.serve_locally = True
+
 data = pd.read_csv('https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/714411/Monthly_museums_and_galleries_April_2018.csv', encoding='latin1')
 
 # replace - with 0 and convert visit number strings to numeric - should fix this in CSV
 locale.setlocale(locale.LC_NUMERIC, '')
 data.loc[data.visits.isin(['-']), 'visits'] = '0'
 data['visits'] = pd.DataFrame({'temp': data.visits}).applymap(atof)
+data.loc[data['visits'] == 0,'visits'] = np.nan
 
 raw_data = data.copy()
 museums_list = data.museum.unique()
@@ -37,8 +42,9 @@ for col in museums_list:
 
 app.layout = html.Div(children=[
     
-    html.H1(children='Museums Dashboard fdfa'),
-    html.H2(children='Compare visits between museums'),
+    html.H1(children='DCMS Museum Visits (This is a draft version)'),
+    
+    html.H3(children='Compare museums'),
     html.Div([
         html.Div([
             dcc.Dropdown(
@@ -48,33 +54,31 @@ app.layout = html.Div(children=[
                         multi=True
                     ),
         ],
-        className="six columns"
+        className="eight columns"
         ),
         html.Div([
-            html.Button('Absolute Values', id='button-1'),
+            html.Button('Actual', id='button-1'),
             html.Button('MA', id='button-2'),
         ],
-        className="six columns"        
+        className="four columns"        
         ),
-    ],
-    #style={'columnCount': 2}
-    className='row'
+        ],
+        #style={'columnCount': 2}
+        className='row'
     ),
-    
-    html.Div(id='my-div'),
     html.Div('off', id = 'hidden-div1', style = {'display': 'none'}),
     html.Div('off', id = 'hidden-div2', style = {'display': 'none'}),
-    dcc.Graph(id='my-graph'),
+    dcc.Graph(id='my-graph', config={'displayModeBar': False}),
     
     
-    html.H2(children='Compare seasons for a museum'),
+    html.H3(children='Seasonal comparison'),
     html.Div([
         html.Div([
             dcc.Dropdown(
                 id='my-dropdown2',
                 options=[{'label': i, 'value': i} for i in museums_list],
-                value='BRITISH MUSEUM')],
-            style={'width': '48%', 'display': 'inline-block'}
+                value='TOTAL VISITOR FIGURES')],
+            className="eight columns"
         ),
         html.Div([
             dcc.Dropdown(
@@ -82,12 +86,16 @@ app.layout = html.Div(children=[
                 options=[{'label': i, 'value': i} for i in years_list],
                 value=[2016, 2017, 2018],
                 multi=True)],
-            style={'width': '48%', 'float': 'right', 'display': 'inline-block'}
+            className="four columns"
         ),
 
-    ]),
-    dcc.Graph(id='my-graph2'),
-])
+        ],
+    className='row'
+    ),
+    dcc.Graph(id='my-graph2', config={'displayModeBar': False}),
+    ],
+    className='container'
+)
 
 
 # we need seperate callbacks so that we can update the hidden div
@@ -112,31 +120,43 @@ def get_selected_data2(clicks, state):
     return mystr
 
 
+dcms_colours = ['#d40072', '#a03155', '#4c2c92', '#005ea5', '#792540']
 colour_list = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
 
 @app.callback(Output('my-graph', 'figure'), [Input('my-dropdown', 'value'), Input('hidden-div1', 'children'), Input('hidden-div2', 'children')])
 def update_graph(selected_dropdown_value, but1, but2):
     traces = []
-    
+
     for i, musy in enumerate(selected_dropdown_value):
+
         if but1 == 'on':
             traces.append(go.Scatter(
                 x=data.Month,
                 y=data[selected_dropdown_value[i]],
                 mode = 'lines+markers',
                 name = musy,
-                line=dict(color=colour_list[i % len(colour_list)], width=3),
-    #            connectgaps=True,
+                line=dict(color=colour_list[i % len(colour_list)]),
             ))    
         if but2 == 'on':
             traces.append(go.Scatter(
                 x=data.Month,
                 y=data[selected_dropdown_value[i] + '_MA'],
                 mode = 'lines',
+                name=musy+' (MA)',
                 showlegend=False,
-                line=dict(color=colour_list[i % len(colour_list)], dash='dash', width=3),
-    #            connectgaps=True,
-            ))    
+                hoverinfo='none',
+                line=dict(color=colour_list[i % len(colour_list)], dash='dash'),
+            ))
+        if but1 == 'off' and but2 == 'on':
+            traces.append(go.Scatter(
+                x=data.Month,
+                y=data[selected_dropdown_value[i] + '_MA'],
+                mode = 'lines',
+                name=musy+' (MA)',
+                showlegend=True,
+                line=dict(color=colour_list[i % len(colour_list)], dash='dash'),
+            ))
+
 
 
     
@@ -200,7 +220,7 @@ def update_graph2(selected_dropdown_value, years):
     )
     return dict(data=traces, layout=layout)
 
-app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
+app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/jKoMNg.css"})
 
 if __name__ == '__main__':
     app.run_server(debug=True)

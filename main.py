@@ -26,10 +26,15 @@ app.scripts.config.serve_locally = True
 data = pd.read_csv('https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/714411/Monthly_museums_and_galleries_April_2018.csv', encoding='latin1')
 
 # replace - with 0 and convert visit number strings to numeric - should fix this in CSV
-locale.setlocale(locale.LC_NUMERIC, '')
 data.loc[data.visits.isin(['-']), 'visits'] = '0'
-data['visits'] = pd.DataFrame({'temp': data.visits}).applymap(atof)
+data['visits'] = data['visits'].str.replace(',', '')
+data['visits'] = data['visits'].astype(int)
 data.loc[data['visits'] == 0,'visits'] = np.nan
+
+
+#locale.setlocale(locale.LC_NUMERIC, '')
+#data['visits'] = pd.DataFrame({'temp': data.visits}).applymap(atof)
+
 
 raw_data = data.copy()
 museums_list = data.museum.unique()

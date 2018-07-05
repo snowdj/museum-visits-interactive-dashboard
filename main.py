@@ -23,7 +23,7 @@ app.scripts.config.serve_locally = True
 #app.css.config.serve_locally = True
 #app.scripts.config.serve_locally = True
 
-data = pd.read_csv('https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/714411/Monthly_museums_and_galleries_April_2018.csv', encoding='latin1')
+data = pd.read_csv('https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/722503/Monthly_museums_and_galleries_May_2018.csv', encoding='latin1')
 
 # replace - with 0 and convert visit number strings to numeric - should fix this in CSV
 data.loc[data.visits.isin(['-']), 'visits'] = '0'
@@ -169,7 +169,7 @@ def update_graph(selected_dropdown_value, but1, but2):
     layout = dict(
         #title='Compare visits between museums',
         xaxis=dict(
-            range=['2003-12-01','2018-04-20'],
+            range=['2003-12-01','2018-05-20'],
             rangeselector=dict(
                 buttons=list([
                     dict(count=1,
@@ -184,7 +184,7 @@ def update_graph(selected_dropdown_value, but1, but2):
                          label='5y',
                          step='year',
                          stepmode='backward'),
-                    dict(count=14*12+4,
+                    dict(count=14*12+5,
                          label='All',
                          step='month',
                          stepmode='backward'),

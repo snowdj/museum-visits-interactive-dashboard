@@ -64,7 +64,7 @@ app.layout = html.Div(children=[
         ),
         html.Div([
             html.Button('Actual', id='button-1'),
-            html.Button('MA', id='button-2'),
+            html.Button('Moving Average', id='button-2'),
         ],
         className="four columns"        
         ),

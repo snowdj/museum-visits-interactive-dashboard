@@ -48,7 +48,7 @@ for col in museums_list:
 
 app.layout = html.Div(children=[
     
-    html.H1(children='DCMS Museum Visits (This is a draft version)'),
+    html.H1(children='DCMS Museum Visits (draft version)'),
     
     html.H3(children='Compare museums'),
     html.Div([

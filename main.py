@@ -229,4 +229,4 @@ def update_graph2(selected_dropdown_value, years):
 app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/jKoMNg.css"})
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()

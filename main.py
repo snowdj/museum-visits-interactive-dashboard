@@ -36,19 +36,189 @@ data.loc[data['visits'] == 0,'visits'] = np.nan
 #data['visits'] = pd.DataFrame({'temp': data.visits}).applymap(atof)
 
 
-raw_data = data.copy()
 museums_list = data.museum.unique()
 years_list = data.year.unique()
 data['day'] = 1
 data['Month'] = pd.to_datetime(data[['month', 'year', 'day']])
+raw_data = data.copy()
 data = data.pivot(index='Month',columns='museum',values='visits')
 data = data.reset_index()
 for col in museums_list:
     data[col + '_MA'] = data.rolling(window=12)[col].mean()
 
+
+
+# [x for x in museums_list if 'TOTAL' not in x]
+museums_list_individual = {
+ 'BRITISH MUSEUM': ['WC1B 3DG', 51.518970, -0.126500],
+ 'GEFFRYE MUSEUM': ['E2 8EA', 51.531556, -0.076271],
+ 'HORNIMAN MUSEUM (Excluding visits to the Garden)': ['SE23 3PQ', 51.441131, -0.060762],
+ 'IWM LONDON': ['SE1 6HZ', 51.496008, -0.108353],
+ 'HMS BELFAST (IWM)': ['SE1 2JH', 51.506048, -0.081481],
+ 'CHURCHILL WAR ROOMS (IWM)': ['SW1A 2AQ', 51.501764, -0.129108],
+ 'IWM DUXFORD ': ['CB22 4QR', 52.094764, 0.128180],
+ 'IWM NORTH': ['M17 1TZ', 53.469713, -2.298734],
+ 'NATIONAL GALLERY': ['WC2N 5DN', 51.509097, -0.127683],
+ '(NHM) SOUTH KENSINGTON': ['SW7 5BD', 51.496563, -0.176892],
+ '(NHM) TRING': ['HP23 6AP', 51.791524, -0.660652],
+ 'ROYAL MUSEUMS GREENWICH ': ['SE10 9NF', 51.481154, -0.003746],
+ 'NATIONAL MUSEUMS LIVERPOOL': ['L3 1DG', 53.406165, -2.995119],
+ 'NATIONAL COAL MINING MUSEUM FOR ENGLAND': ['WF4 4RH', 53.643479, -1.619416],
+ 'SCIENCE MUSEUM GROUP SOUTH KENSINGTON ': ['SW7 2DD', 51.497295, -0.176503],
+ 'SCIENCE MUSEUM GROUP NATIONAL MEDIA MUSEUM': ['BD1 1NQ', 53.790557, -1.756460],
+ 'SCIENCE MUSEUM GROUP NATIONAL RAILWAY MUSEUM': ['YO26 4XJ', 53.960767, -1.096551],
+ 'SCIENCE MUSEUM GROUP  LOCOMOTION AT SHILDON': ['DL4 2RE'],
+ 'SCIENCE MUSEUM GROUP MUSEUM OF SCIENCE AND INDUSTRY, MANCHESTER': ['M3 4FP'],
+ 'SCIENCE MUSEUM GROUP SWINDON (WROUGHTON)': ['SN4 9LT'],
+ 'NATIONAL PORTRAIT GALLERY': ['WC2H 0HE'],
+ '(RA) LEEDS': ['LS10 1LT'],
+ '(RA) FORT NELSON ': ['PO17 6AN'],
+ '(RA) WHITE TOWER (BASED AT THE TOWER OF LONDON) ': ['EC3N 4AB'],
+ "SIR JOHN SOANE'S MUSEUM": ['WC2A 3BP'],
+ 'TATE BRITAIN ': ['SW1P 4RG'],
+ 'TATE MODERN  ': ['SE1 9TG'],
+ 'TATE LIVERPOOL': ['L3 4BB'],
+ 'TATE ST IVES': ['TR26 1TG'],
+ '(V&A) SOUTH KENSINGTON': ['SW7 2RL'],
+ '(V&A) MUSEUM OF CHILDHOOD, BETHNAL GREEN': ['E2 9PA'],
+ '(V&A) BLYTHE HOUSE': ['W14 0QX'],
+ 'WALLACE COLLECTION': ['W1U 3BN'],
+ '(T&W) ARBEIA': ['NE33 2BB'],
+ '(T&W) DISCOVERY': ['NE1 4JA'],
+ '(T&W) GREAT NORTH MUSEUM': ['NE2 4PT'],
+ '(T&W) LAING': ['NE1 8AG'],
+ '(T&W) WASHINGTON F PIT': ['NE37 1BN'],
+ '(T&W) SEGEDUNUM': ['NE28 6HR'],
+ '(T&W) SHIPLEY': ['NE8 4JB'],
+ '(T&W) SOUTH SHIELDS': ['NE33 2JA'],
+ '(T&W) HATTON GALLERY': ['NE1 7RU'],
+ '(T&W) STEPHENSON ': ['NE29 8DX'],
+ 'MUSEUM OF LONDON': ['EC2Y 5HN'],
+ 'MUSEUM IN DOCKLANDS': ['E14 4AL'],
+}
+
+#from geopy.geocoders import GoogleV3
+#from geopy.geocoders import Bing
+#geolocator = GoogleV3()
+#geolocator = Bing(api_key = 'As--8aijMhZO5UZPjONPEaePK5nn16TgjznsOZEYbDTEwgsaL3C364fnOIwzEg8N')
+##api_key
+#location = geolocator.geocode("BRITISH MUSEUM")
+#print((location.latitude, location.longitude))
+#geolocator.geocode("WC1B 3DG").latitude
+#geolocator.geocode("YO26 4XJ").latitude
+#geolocator.geocode("HORNIMAN MUSEUM (Excluding visits to the Garden)").longitude
+#
+#test = pd.DataFrame({
+#    'mus': [x for x in museums_list if 'TOTAL' not in x]
+#})
+#
+#mus_locs = pd.DataFrame.from_dict(museums_list_individual, orient='index')
+#mus_locs['location'] = mus_locs[0].apply(geolocator.geocode)
+#mus_locs['lon'] = mus_locs['location'].apply(lambda x: x.longitude)
+#mus_locs['lat'] = mus_locs['location'].apply(lambda x: x.latitude)
+#mus_locs.to_csv('mus_locs.csv')
+mus_locs = pd.read_csv('mus_locs.csv', index_col=0)
+
+musy = raw_data.copy()
+today = max(musy.Month)
+musy = musy.loc[(musy['Month'] > (today - pd.DateOffset(years=1))) & (musy['Month'] <= today)]
+last_year = musy.groupby(['museum']).sum()
+last_year = last_year.reset_index()
+last_year = last_year.loc[last_year['visits'] > 0]
+
+def format_nums(num):
+    if num >= 999000:
+        fnum = str(round(num / 1000000, 1)) + 'M'
+    elif num >= 1000:
+        fnum = str(int(round(num / 1000, 0))) + 'k'
+    else:
+        fnum = str(int(num))
+    return(fnum)
+
+last_year['visits_format'] = last_year['visits'].apply(format_nums)
+
+# leaderboard df ---------------------------------------------------------------
+
+def generate_table(dataframe, max_rows=10):
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in dataframe.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+        ]) for i in range(min(len(dataframe), max_rows))]
+    )
+
+leaderboard_df = last_year.sort_values(by='visits', ascending=False)
+leaderboard_df = leaderboard_df.head(10)
+leaderboard_df = leaderboard_df[['museum', 'visits_format']]
+
+
+
+# mapbox df --------------------------------------------------------------------
+
+last_year_map = last_year.loc[last_year['museum'].isin(mus_locs.index)]
+last_year_map = last_year_map.set_index(['museum'])
+
+last_year_map['lat'] = mus_locs['lat']
+last_year_map['lon'] = mus_locs['lon']
+
+mymin = min(last_year_map['visits'])
+mymax = max(last_year_map['visits'])
+a = 10
+b = 30
+def scale_visits(x):
+    return ((b-a) * (x - mymin) / (mymax - mymin)) + a
+
+last_year_map['size'] = last_year_map['visits'].apply(scale_visits)
+
+last_year_map['hovertext'] = last_year_map.index + '<br>' + last_year_map['visits_format'].astype(str)
+
+
+mapbox_access_token = 'pk.eyJ1IjoibWF4d2VsbDg4ODgiLCJhIjoiY2pqcHJpbnF6MDhzMDN3cDRubGJuMzBsayJ9.bA38eIQYmV3OMpwgeeb2Dg'
+
+
+fig_geo = dict(
+    data = [go.Scattermapbox(
+        lat=last_year_map['lat'],
+        lon=last_year_map['lon'],
+        mode='markers',
+        marker=dict(
+            size=last_year_map['size'],
+            color='#d40072',
+        ),
+#        hovertext='monkey',
+        hoverinfo='text',
+        hovertext=last_year_map['hovertext'],
+    )
+    ],
+
+    layout = go.Layout(
+        autosize=True,
+        hovermode='closest',
+        mapbox=dict(
+            accesstoken=mapbox_access_token,
+            bearing=0,
+            center=dict(
+                lat=52.878051,
+                lon=-2.035973
+            ),
+            pitch=0,
+            zoom=5,
+            style='mapbox://styles/maxwell8888/cjk150o1k2jho2soarb32una4'
+        ),
+        margin = dict(l=0, r=0, t=0, b=0),
+    )
+)
+
 app.layout = html.Div(children=[
     
     html.H1(children='DCMS Museum Visits (draft version)'),
+    
+    generate_table(leaderboard_df),
+    
+    dcc.Graph(id='my-graph-geo', figure = fig_geo, style={'height': '600', 'width': '400'}, config={'displayModeBar': False}),
     
     html.H3(children='Compare museums'),
     html.Div([
@@ -229,4 +399,4 @@ def update_graph2(selected_dropdown_value, years):
 app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/jKoMNg.css"})
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug=True)

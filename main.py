@@ -241,7 +241,7 @@ fig_geo = dict(
 
 
 
-app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/gjGXje.css"})
+app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/EpwOBy.css"})
 
 # layout -----------------------------------------------------------------------
 
@@ -250,8 +250,23 @@ app.layout = html.Div([
     html.Div([
         html.Header([
                 html.Div([
-                    html.Img(src='https://churchill-beta.dwp.gov.uk/images/logo-gov-white.png', ),
-                    html.Div(['Hello world'])], 
+                    html.A([
+                        html.Img(src='https://churchill-beta.dwp.gov.uk/images/logo-gov-white.png', className='logo'),
+                        html.Div(['DCMS Statistics'], className='dcmslink'),
+                        ], 
+                        href='https://www.gov.uk/government/organisations/department-for-digital-culture-media-sport/about/statistics',
+                        className='header-link'),
+                    html.Div(['BETA'], className='beta'),
+                    html.Div([
+                        html.P(['Give us '], className='feedback-text'), 
+                        html.A(
+                            ['feedback'], 
+                            href='mailto:evidence@culture.gov.uk?subject=Museum visits dashboard feedback',
+                            className='feedback-link'
+                        )
+                    ], 
+                    className='feedback'),
+                ],
                 className='header-content',
                 ),
         ],
@@ -259,7 +274,7 @@ app.layout = html.Div([
         ),
         
         html.Div([
-            html.H1(children='DCMS Museum Visits (draft version)', className='myh1'),
+            html.H1(children='DCMS Museum Visits Dashboard', className='myh1'),
             
             html.Div([
                 html.H3(children='Visitor numbers in last 12 Months', className='myh3'),
@@ -313,7 +328,7 @@ app.layout = html.Div([
                         options=[{'label': i, 'value': i} for i in years_list],
                         value=[2016, 2017, 2018],
                         multi=True)],
-                className='dp3'
+                className='dp3',
                 ),
             
                 dcc.Graph(id='my-graph2', config={'displayModeBar': False}, className='graph2'),
@@ -324,7 +339,20 @@ app.layout = html.Div([
         ],
         className='main',
         ),
-        html.Div(['this is my foot.'], className='footer'),
+        html.Div([
+            html.A([
+                html.Img(src='https://churchill-beta.dwp.gov.uk/images/open-gov-licence.png', className='ogl-logo')], 
+                href='https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/',
+                className = 'ogl-logo-link footer-format'),
+            html.P(['All content is available under the '], className='ogl1 footer-format'),
+            html.A(['Open Government Licence v3.0'], 
+                   href='https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/',
+                   className='ogl-link footer-format'),
+            html.P([' except where otherwise stated'], className='ogl2 footer-format'),
+            html.P('Contact Details: For any queries please telephone 020 7211 6000 or email evidence@culture.gov.uk', className='contact footer-format')
+        ],
+        className='myfooter',
+        ),
 #        html.Div(['four'], className='sidebar'),
 #        html.Div(['five'], className='five'),
 #        html.Div(['six'], className='six'),
@@ -336,6 +364,27 @@ app.layout = html.Div([
     html.Div('off', id = 'hidden-div2', style = {'display': 'none'}),
 
 ])
+
+# match button css to state
+@app.callback(
+    Output('button-1', 'style'),
+    [Input('hidden-div1', 'children')])
+def button1_css(clicks):
+    if clicks == 'on':
+        mydict = dict(color = 'rgb(0, 126, 255)', backgroundColor = 'rgba(0, 126, 255, 0.08)')
+    else:
+        mydict = dict(color = 'rgb(204, 204, 204)', backgroundColor = 'white')
+    return mydict
+
+@app.callback(
+    Output('button-2', 'style'),
+    [Input('hidden-div2', 'children')])
+def button2_css(clicks):
+    if clicks == 'on':
+        mydict = dict(color = 'rgb(0, 126, 255)', backgroundColor = 'rgba(0, 126, 255, 0.08)')
+    else:
+        mydict = dict(color = 'rgb(204, 204, 204)', backgroundColor = 'white')
+    return mydict
 
 
 # we need seperate callbacks so that we can update the hidden div
@@ -426,7 +475,8 @@ def update_graph(selected_dropdown_value, but1, but2):
             ),
             #rangeslider=dict(),
             type='date',
-        )
+        ),
+        margin=dict(t=50),
     )
     return dict(data=traces, layout=layout)
 
@@ -456,7 +506,8 @@ def update_graph2(selected_dropdown_value, years):
             #rangeslider=dict(),
             #type='category',
             tickformat= '%b'
-        )
+        ),
+        margin=dict(t=50),
     )
     return dict(data=traces, layout=layout)
 

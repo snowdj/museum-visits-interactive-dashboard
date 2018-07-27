@@ -3,7 +3,8 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-from flask import Flask
+from flask import Flask, send_from_directory
+import os
 
 import plotly.plotly as py
 import plotly.graph_objs as go
@@ -15,7 +16,7 @@ import calendar
 import locale
 from locale import atof
 
-server = Flask(__name__)
+server = Flask(__name__, static_folder='static')
 app = dash.Dash(__name__, server=server)
 app.scripts.config.serve_locally = True
 
@@ -139,21 +140,47 @@ last_year['visits_format'] = last_year['visits'].apply(format_nums)
 
 # leaderboard df ---------------------------------------------------------------
 
-def generate_table(dataframe, max_rows=10):
-    return html.Table(
-        # Header
-        [html.Tr([html.Th(col) for col in dataframe.columns])] +
+leaderboard_mus = ['BRITISH MUSEUM',
+ 'IWM TOTAL',
+ 'NHM TOTAL',
+ 'SCIENCE MUSEUM GROUP TOTAL',
+ '(RA) TOTAL',
+ 'TATE TOTAL',
+ '(V&A) TOTAL',
+ 'TYNE & WEAR TOTAL',
+ 'HORNIMAN MUSEUM',
+ 'NATIONAL GALLERY',
+ 'NATIONAL PORTRAIT GALLERY']
+leaderboard_df = last_year.loc[last_year['museum'].isin(leaderboard_mus)]
+leaderboard_df = leaderboard_df.sort_values(by='visits', ascending=True)
 
-        # Body
-        [html.Tr([
-            html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-        ]) for i in range(min(len(dataframe), max_rows))]
-    )
+#leaderboard_df = leaderboard_df[['museum', 'visits_format']]
 
-leaderboard_df = last_year.sort_values(by='visits', ascending=False)
-leaderboard_df = leaderboard_df.head(10)
-leaderboard_df = leaderboard_df[['museum', 'visits_format']]
-
+leaderboard_figure={
+        'data': [go.Bar(x=leaderboard_df['visits'], 
+                        y=leaderboard_df['museum'],
+                        text=leaderboard_df['visits_format'],
+                        textposition = 'outside',
+                        orientation='h',
+                        marker=dict(
+                            color='#d40072',
+#                            width=3,
+                        ),
+                        width=0.5,
+                        cliponaxis=False,
+                        hoverinfo='none'),
+                ],
+        'layout': go.Layout(margin = dict(l=250, r=100, t=0, b=0, pad=2),
+                            xaxis = dict(
+                                showgrid=False,
+                                zeroline=False,
+                                showline=False,),
+                            yaxis = dict(
+                                showgrid=False,
+                                zeroline=False,
+                                showline=False,),
+                            )
+    }
 
 
 # mapbox df --------------------------------------------------------------------
@@ -167,7 +194,7 @@ last_year_map['lon'] = mus_locs['lon']
 mymin = min(last_year_map['visits'])
 mymax = max(last_year_map['visits'])
 a = 10
-b = 30
+b = 50
 def scale_visits(x):
     return ((b-a) * (x - mymin) / (mymax - mymin)) + a
 
@@ -212,66 +239,103 @@ fig_geo = dict(
     )
 )
 
-app.layout = html.Div(children=[
-    
-    html.H1(children='DCMS Museum Visits (draft version)'),
-    
-    generate_table(leaderboard_df),
-    
-    dcc.Graph(id='my-graph-geo', figure = fig_geo, style={'height': '600', 'width': '400'}, config={'displayModeBar': False}),
-    
-    html.H3(children='Compare museums'),
+
+
+app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/gjGXje.css"})
+
+# layout -----------------------------------------------------------------------
+
+app.layout = html.Div([
+
     html.Div([
+        html.Header([
+                html.Div([
+                    html.Img(src='https://churchill-beta.dwp.gov.uk/images/logo-gov-white.png', ),
+                    html.Div(['Hello world'])], 
+                className='header-content',
+                ),
+        ],
+        className='header'
+        ),
+        
         html.Div([
-            dcc.Dropdown(
-                        id='my-dropdown',
+            html.H1(children='DCMS Museum Visits (draft version)', className='myh1'),
+            
+            html.Div([
+                html.H3(children='Visitor numbers in last 12 Months', className='myh3'),
+    
+                dcc.Graph(id='leaderboard', figure=leaderboard_figure, config={'displayModeBar': False, 'staticPlot': True}, className='lb'),
+                    
+                dcc.Graph(id='my-graph-geo', figure = fig_geo, config={'displayModeBar': False}, className='map'),    
+            ],
+            className='vn mysec',
+            ),
+            
+            html.Div([
+                html.H3(children='Time series', className='myh32'),
+                
+                # I beleive dash wraps the dropdown in a div when using the id property, but the class will be in the child, so need to wrap in another div to set a class for the css grid.
+                html.Div([ 
+                    dcc.Dropdown(
+                                id='my-dropdown',
+                                options=[{'label': i, 'value': i} for i in museums_list],
+                                value=['BRITISH MUSEUM', 'IWM TOTAL'],
+                                multi=True
+                            ),
+                ],
+                className='dp1',
+                ),
+                
+                html.Div([
+                    html.Button('Actual', id='button-1', className='actual-bt'),
+                    html.Button('Moving Average', id='button-2', className='ma-bt'),
+                ],
+                className='ts-bts',
+                ),
+                html.Div([dcc.Graph(id='my-graph', config={'displayModeBar': False})], className='graph1'),
+            ],
+            className='ts mysec',
+            ),
+    
+            html.Div([
+                html.H3(children='Seasonal comparison', className='myh33'),
+                
+                html.Div([
+                    dcc.Dropdown(
+                        id='my-dropdown2',
                         options=[{'label': i, 'value': i} for i in museums_list],
-                        value=['BRITISH MUSEUM', 'IWM TOTAL'],
-                        multi=True
-                    ),
+                        value='TOTAL VISITOR FIGURES')],
+                className='dp2',
+                ),
+                html.Div([
+                    dcc.Dropdown(
+                        id='choose-years',
+                        options=[{'label': i, 'value': i} for i in years_list],
+                        value=[2016, 2017, 2018],
+                        multi=True)],
+                className='dp3'
+                ),
+            
+                dcc.Graph(id='my-graph2', config={'displayModeBar': False}, className='graph2'),
+            ],
+            className='seasonal mysec',
+            ),            
+            
         ],
-        className="eight columns"
+        className='main',
         ),
-        html.Div([
-            html.Button('Actual', id='button-1'),
-            html.Button('Moving Average', id='button-2'),
-        ],
-        className="four columns"        
-        ),
-        ],
-        #style={'columnCount': 2}
-        className='row'
+        html.Div(['this is my foot.'], className='footer'),
+#        html.Div(['four'], className='sidebar'),
+#        html.Div(['five'], className='five'),
+#        html.Div(['six'], className='six'),
+    ], 
+    className='wrapper'
     ),
+    
     html.Div('off', id = 'hidden-div1', style = {'display': 'none'}),
     html.Div('off', id = 'hidden-div2', style = {'display': 'none'}),
-    dcc.Graph(id='my-graph', config={'displayModeBar': False}),
-    
-    
-    html.H3(children='Seasonal comparison'),
-    html.Div([
-        html.Div([
-            dcc.Dropdown(
-                id='my-dropdown2',
-                options=[{'label': i, 'value': i} for i in museums_list],
-                value='TOTAL VISITOR FIGURES')],
-            className="eight columns"
-        ),
-        html.Div([
-            dcc.Dropdown(
-                id='choose-years',
-                options=[{'label': i, 'value': i} for i in years_list],
-                value=[2016, 2017, 2018],
-                multi=True)],
-            className="four columns"
-        ),
 
-        ],
-    className='row'
-    ),
-    dcc.Graph(id='my-graph2', config={'displayModeBar': False}),
-    ],
-    className='container'
-)
+])
 
 
 # we need seperate callbacks so that we can update the hidden div
@@ -396,7 +460,11 @@ def update_graph2(selected_dropdown_value, years):
     )
     return dict(data=traces, layout=layout)
 
-app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/jKoMNg.css"})
+
+@server.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(server.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 if __name__ == '__main__':
     app.run_server(debug=True)

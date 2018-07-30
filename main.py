@@ -154,6 +154,11 @@ leaderboard_mus = ['BRITISH MUSEUM',
 leaderboard_df = last_year.loc[last_year['museum'].isin(leaderboard_mus)]
 leaderboard_df = leaderboard_df.sort_values(by='visits', ascending=True)
 
+excl_mus = ['TOTAL VISITOR FIGURES', 'TATE MODERN  ', '(NHM) SOUTH KENSINGTON', 'SCIENCE MUSEUM GROUP SOUTH KENSINGTON ', '(V&A) SOUTH KENSINGTON', '(RA) WHITE TOWER (BASED AT THE TOWER OF LONDON) ', 'TATE BRITAIN ']
+leaderboard_df = last_year.sort_values(by='visits', ascending=True)
+leaderboard_df = leaderboard_df.loc[~last_year['museum'].isin(excl_mus)]
+leaderboard_df = leaderboard_df.tail(11)
+
 #leaderboard_df = leaderboard_df[['museum', 'visits_format']]
 
 leaderboard_figure={
@@ -170,7 +175,7 @@ leaderboard_figure={
                         cliponaxis=False,
                         hoverinfo='none'),
                 ],
-        'layout': go.Layout(margin = dict(l=250, r=100, t=0, b=0, pad=2),
+        'layout': go.Layout(margin = dict(l=210, r=50, t=80, b=0, pad=2),
                             xaxis = dict(
                                 showgrid=False,
                                 zeroline=False,
@@ -179,7 +184,8 @@ leaderboard_figure={
                                 showgrid=False,
                                 zeroline=False,
                                 showline=False,),
-                            )
+                            title = 'Top 10 museums<br>by visitor numbers'
+                            ),
     }
 
 
@@ -235,15 +241,18 @@ fig_geo = dict(
             zoom=5,
             style='mapbox://styles/maxwell8888/cjk150o1k2jho2soarb32una4'
         ),
-        margin = dict(l=0, r=0, t=0, b=0),
+        margin = dict(l=0, r=0, t=30, b=0),
     )
 )
 
 
 
-app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/EpwOBy.css"})
+app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/qypVxB.css"})
 
 # layout -----------------------------------------------------------------------
+
+from textwrap import dedent
+
 
 app.layout = html.Div([
 
@@ -276,8 +285,16 @@ app.layout = html.Div([
         html.Div([
             html.H1(children='DCMS Museum Visits Dashboard', className='myh1'),
             
+            html.Div([dcc.Markdown('''
+Updated to include May 2018 data.
+***
+This tool shows the number of visits to DCMS sponsored museums. It is based on monthly data collected since April 2004.
+***
+To help ensure the information in this dashboard is transparent, the data used is pulled directly from [gov.uk/government/statistical-data-sets/museums-and-galleries-monthly-visits](https://www.gov.uk/government/statistical-data-sets/museums-and-galleries-monthly-visits) which has information about the data and a [preview](https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/722503/Monthly_museums_and_galleries_May_2018.csv/preview), and the dashboard's [source code](https://github.com/DCMSstats/museum-visits-interactive-dashboard) is [open source](https://www.gov.uk/service-manual/technology/making-source-code-open-and-reusable) with an [Open Government Licence](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+            ''')], className='preamble mysec'),
+            
             html.Div([
-                html.H3(children='Visitor numbers in last 12 Months', className='myh3'),
+                html.H3(children='Number of visitors in the last 12 Months', className='myh3'),
     
                 dcc.Graph(id='leaderboard', figure=leaderboard_figure, config={'displayModeBar': False, 'staticPlot': True}, className='lb'),
                     

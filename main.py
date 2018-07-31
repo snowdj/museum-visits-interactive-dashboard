@@ -157,7 +157,7 @@ leaderboard_df = leaderboard_df.sort_values(by='visits', ascending=True)
 excl_mus = ['TOTAL VISITOR FIGURES', 'TATE MODERN  ', '(NHM) SOUTH KENSINGTON', 'SCIENCE MUSEUM GROUP SOUTH KENSINGTON ', '(V&A) SOUTH KENSINGTON', '(RA) WHITE TOWER (BASED AT THE TOWER OF LONDON) ', 'TATE BRITAIN ']
 leaderboard_df = last_year.sort_values(by='visits', ascending=True)
 leaderboard_df = leaderboard_df.loc[~last_year['museum'].isin(excl_mus)]
-leaderboard_df = leaderboard_df.tail(11)
+leaderboard_df = leaderboard_df.tail(10)
 
 #leaderboard_df = leaderboard_df[['museum', 'visits_format']]
 
@@ -242,6 +242,8 @@ fig_geo = dict(
             style='mapbox://styles/maxwell8888/cjk150o1k2jho2soarb32una4'
         ),
         margin = dict(l=0, r=0, t=30, b=0),
+        title = 'to zoom, use trackpad or mouse scroll',
+        titlefont = {'size': 10}
     )
 )
 

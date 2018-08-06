@@ -5,7 +5,7 @@
 Unless stated otherwise, the codebase is released under [the MIT License][mit].
 This covers both the codebase and any sample code in the documentation.
 
-The documentation is [© Crown copyright][copyright] and all content is available under the terms
+The content is [© Crown copyright][copyright] is available under the terms
 of the [Open Government 3.0][ogl] licence.
 
 [mit]: LICENCE

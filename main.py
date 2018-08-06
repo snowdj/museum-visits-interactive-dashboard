@@ -24,7 +24,7 @@ app.scripts.config.serve_locally = True
 #app.css.config.serve_locally = True
 #app.scripts.config.serve_locally = True
 
-data = pd.read_csv('https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/722503/Monthly_museums_and_galleries_May_2018.csv', encoding='latin1')
+data = pd.read_csv('https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/731313/Monthly_museums_and_galleries_June_2018.csv', encoding='latin1')
 
 # replace - with 0 and convert visit number strings to numeric - should fix this in CSV
 data.loc[data.visits.isin(['-']), 'visits'] = '0'
@@ -54,11 +54,11 @@ museums_list_individual = {
  'BRITISH MUSEUM': ['WC1B 3DG', 51.518970, -0.126500],
  'GEFFRYE MUSEUM': ['E2 8EA', 51.531556, -0.076271],
  'HORNIMAN MUSEUM (Excluding visits to the Garden)': ['SE23 3PQ', 51.441131, -0.060762],
- 'IWM LONDON': ['SE1 6HZ', 51.496008, -0.108353],
- 'HMS BELFAST (IWM)': ['SE1 2JH', 51.506048, -0.081481],
- 'CHURCHILL WAR ROOMS (IWM)': ['SW1A 2AQ', 51.501764, -0.129108],
- 'IWM DUXFORD ': ['CB22 4QR', 52.094764, 0.128180],
- 'IWM NORTH': ['M17 1TZ', 53.469713, -2.298734],
+ 'IMPERIAL WAR MUSEUM LONDON': ['SE1 6HZ', 51.496008, -0.108353],
+ 'HMS BELFAST (IMPERIAL WAR MUSEUM)': ['SE1 2JH', 51.506048, -0.081481],
+ 'CHURCHILL WAR ROOMS (IMPERIAL WAR MUSEUM)': ['SW1A 2AQ', 51.501764, -0.129108],
+ 'IMPERIAL WAR MUSEUM DUXFORD ': ['CB22 4QR', 52.094764, 0.128180],
+ 'IMPERIAL WAR MUSEUM NORTH': ['M17 1TZ', 53.469713, -2.298734],
  'NATIONAL GALLERY': ['WC2N 5DN', 51.509097, -0.127683],
  '(NHM) SOUTH KENSINGTON': ['SW7 5BD', 51.496563, -0.176892],
  '(NHM) TRING': ['HP23 6AP', 51.791524, -0.660652],
@@ -141,7 +141,7 @@ last_year['visits_format'] = last_year['visits'].apply(format_nums)
 # leaderboard df ---------------------------------------------------------------
 
 leaderboard_mus = ['BRITISH MUSEUM',
- 'IWM TOTAL',
+ 'IMPERIAL WAR MUSEUM TOTAL',
  'NHM TOTAL',
  'SCIENCE MUSEUM GROUP TOTAL',
  '(RA) TOTAL',
@@ -175,7 +175,7 @@ leaderboard_figure={
                         cliponaxis=False,
                         hoverinfo='none'),
                 ],
-        'layout': go.Layout(margin = dict(l=210, r=50, t=80, b=0, pad=2),
+        'layout': go.Layout(margin = dict(l=330, r=50, t=80, b=0, pad=2),
                             xaxis = dict(
                                 showgrid=False,
                                 zeroline=False,
@@ -249,7 +249,7 @@ fig_geo = dict(
 
 
 
-app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/qypVxB.css"})
+app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/XBBGWb.css"})
 
 # layout -----------------------------------------------------------------------
 
@@ -288,11 +288,11 @@ app.layout = html.Div([
             html.H1(children='DCMS Museum Visits Dashboard', className='myh1'),
             
             html.Div([dcc.Markdown('''
-Updated to include May 2018 data.
+Updated to include June 2018 data.
 ***
 This tool shows the number of visits to DCMS sponsored museums. It is based on monthly data collected since April 2004.
 ***
-To help ensure the information in this dashboard is transparent, the data used is pulled directly from [gov.uk/government/statistical-data-sets/museums-and-galleries-monthly-visits](https://www.gov.uk/government/statistical-data-sets/museums-and-galleries-monthly-visits) which has information about the data and a [preview](https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/722503/Monthly_museums_and_galleries_May_2018.csv/preview), and the dashboard's [source code](https://github.com/DCMSstats/museum-visits-interactive-dashboard) is [open source](https://www.gov.uk/service-manual/technology/making-source-code-open-and-reusable) with an [Open Government Licence](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+To help ensure the information in this dashboard is transparent, the data used is pulled directly from [gov.uk/government/statistical-data-sets/museums-and-galleries-monthly-visits](https://www.gov.uk/government/statistical-data-sets/museums-and-galleries-monthly-visits) which has information about the data and a [preview](https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/731313/Monthly_museums_and_galleries_June_2018.csv/preview), and the dashboard's [source code](https://github.com/DCMSstats/museum-visits-interactive-dashboard) is [open source](https://www.gov.uk/service-manual/technology/making-source-code-open-and-reusable) with an [Open Government Licence](http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
             ''')], className='preamble mysec'),
             
             html.Div([
@@ -313,7 +313,7 @@ To help ensure the information in this dashboard is transparent, the data used i
                     dcc.Dropdown(
                                 id='my-dropdown',
                                 options=[{'label': i, 'value': i} for i in museums_list],
-                                value=['BRITISH MUSEUM', 'IWM TOTAL'],
+                                value=['BRITISH MUSEUM', 'TATE BRITAIN '],
                                 multi=True
                             ),
                 ],

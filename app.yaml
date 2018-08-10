@@ -2,7 +2,7 @@
 runtime: python
 env: flex
 entrypoint: gunicorn -b :$PORT main:server
-service: museum_visits
+service: museum
 
 runtime_config:
   python_version: 3

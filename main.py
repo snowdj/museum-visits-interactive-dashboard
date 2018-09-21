@@ -138,6 +138,10 @@ def format_nums(num):
 
 last_year['visits_format'] = last_year['visits'].apply(format_nums)
 
+# kpi data ---------------------------------------------------------------------
+kpi = pd.read_csv('museum-dashboard-kpi.csv')
+
+
 # leaderboard df ---------------------------------------------------------------
 
 leaderboard_mus = ['BRITISH MUSEUM',
@@ -249,7 +253,7 @@ fig_geo = dict(
 
 
 
-app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/XBBGWb.css"})
+app.css.append_css({"external_url": "https://codepen.io/Maxwell8888/pen/JazmXB.css"})
 
 # layout -----------------------------------------------------------------------
 
@@ -306,7 +310,7 @@ To help ensure the information in this dashboard is transparent, the data used i
             ),
             
             html.Div([
-                html.H3(children='Time series', className='myh32'),
+                html.H3(children='Visitor Numbers (Monthly)', className='myh32'),
                 
                 # I beleive dash wraps the dropdown in a div when using the id property, but the class will be in the child, so need to wrap in another div to set a class for the css grid.
                 html.Div([ 
@@ -332,7 +336,7 @@ To help ensure the information in this dashboard is transparent, the data used i
             ),
     
             html.Div([
-                html.H3(children='Seasonal comparison', className='myh33'),
+                html.H3(children='Visitor Numbers - seasonal comparison (Monthly)', className='myh33'),
                 
                 html.Div([
                     dcc.Dropdown(
@@ -354,6 +358,33 @@ To help ensure the information in this dashboard is transparent, the data used i
             ],
             className='seasonal mysec',
             ),            
+
+            html.Div([
+                html.H3(children='Key Performance Indicators (Annual)', className='myh34'),
+                
+                html.Div([
+                    dcc.Dropdown(
+                        id='kpi-museum',
+                        options=[{'label': i, 'value': i} for i in kpi.Museum.unique()],
+                        value=['British Museum', 'National Portait Gallery'],
+                        multi=True)],
+                className='kpi-museum',
+                ),
+                html.Div([
+                    dcc.Dropdown(
+                        id='kpi-indicator',
+                        options=[{'label': i, 'value': i} for i in kpi.columns[2:]],
+                        value=['Annual Visitors', 'Child visits'],
+                        multi=True)],
+                className='kpi-indicator',
+                ),
+            
+                dcc.Graph(id='my-graph3', config={'displayModeBar': False}, className='graph3'),
+            ],
+            className='kpi mysec',
+            ),            
+
+
             
         ],
         className='main',
@@ -529,6 +560,47 @@ def update_graph2(selected_dropdown_value, years):
         margin=dict(t=50),
     )
     return dict(data=traces, layout=layout)
+
+
+@app.callback(Output('my-graph3', 'figure'), [Input('kpi-museum', 'value'), Input('kpi-indicator', 'value')])
+def update_graph3(museum, indicator):
+#    season_data['month_name'] = season_data['month'].apply(lambda x: calendar.month_abbr[x])
+#    season_data = season_data.pivot(index='month',columns='year',values='visits')
+#    season_data = season_data.reset_index()
+#    season_data['day'] = 1
+#    season_data['year'] = 2018
+#    season_data['Month'] = pd.to_datetime(season_data[['month', 'year', 'day']])
+#    season_data['Month'] = data.Month.apply(lambda x: x.strftime('%b'))
+
+    traces = []
+    for i in museum:
+        season_data = kpi.copy()
+        season_data = season_data.loc[season_data['Museum'] == i]
+        for j in indicator:
+            j2 = j
+            if j == 'Facilitated and self directed visits by visitors under 18 years old and in formal education':
+                j2 = 'Formal Education'
+            if j == 'Number of instances where visitors under 18 years old participated in on-site activites':
+                j2 = 'On-site activities'
+                
+            traces.append(go.Scatter(
+                x=season_data.Year,
+                y=season_data[j],
+                name=str(i + ': ' + j2)
+            ))
+        
+    layout = dict(
+        xaxis=dict(
+            #range=[4,5,6,7,8,9,10,11,12,1,2,3],
+            #rangeslider=dict(),
+            #type='category',
+            tickformat= '%b'
+        ),
+        margin=dict(t=50),
+#        legend = dict(x=.01, y=-0.5),
+    )
+    return dict(data=traces, layout=layout)
+
 
 
 @server.route('/favicon.ico')

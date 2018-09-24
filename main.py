@@ -24,7 +24,7 @@ app.scripts.config.serve_locally = True
 #app.css.config.serve_locally = True
 #app.scripts.config.serve_locally = True
 
-data = pd.read_csv('https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/731313/Monthly_museums_and_galleries_June_2018.csv', encoding='latin1')
+data = pd.read_csv('https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/738511/Monthly_museums_and_galleries_July_2018.csv', encoding='latin1')
 
 # replace - with 0 and convert visit number strings to numeric - should fix this in CSV
 data.loc[data.visits.isin(['-']), 'visits'] = '0'
@@ -292,7 +292,7 @@ app.layout = html.Div([
             html.H1(children='DCMS Museum Visits Dashboard', className='myh1'),
             
             html.Div([dcc.Markdown('''
-Updated to include June 2018 data.
+Updated to include July 2018 data.
 ***
 This tool shows the number of visits to DCMS sponsored museums. It is based on monthly data collected since April 2004.
 ***
@@ -360,7 +360,7 @@ To help ensure the information in this dashboard is transparent, the data used i
             ),            
 
             html.Div([
-                html.H3(children='Key Performance Indicators (Annual)', className='myh34'),
+                html.H3(children='Performance Indicators (Annual)', className='myh34'),
                 
                 html.Div([
                     dcc.Dropdown(
@@ -502,7 +502,7 @@ def update_graph(selected_dropdown_value, but1, but2):
     layout = dict(
         #title='Compare visits between museums',
         xaxis=dict(
-            range=['2003-12-01','2018-05-20'],
+            range=['2003-12-01','2018-07-20'],
             rangeselector=dict(
                 buttons=list([
                     dict(count=1,
@@ -517,7 +517,7 @@ def update_graph(selected_dropdown_value, but1, but2):
                          label='5y',
                          step='year',
                          stepmode='backward'),
-                    dict(count=14*12+5,
+                    dict(count=14*12+8,
                          label='All',
                          step='month',
                          stepmode='backward'),

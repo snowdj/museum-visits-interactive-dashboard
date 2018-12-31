@@ -24,7 +24,7 @@ app.scripts.config.serve_locally = True
 #app.css.config.serve_locally = True
 #app.scripts.config.serve_locally = True
 
-data = pd.read_csv('https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/738511/Monthly_museums_and_galleries_July_2018.csv', encoding='latin1')
+data = pd.read_csv('Monthly_museums_and_galleries_July_2018.csv', encoding='latin1')
 
 # replace - with 0 and convert visit number strings to numeric - should fix this in CSV
 data.loc[data.visits.isin(['-']), 'visits'] = '0'
